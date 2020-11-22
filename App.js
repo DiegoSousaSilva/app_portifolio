@@ -6,8 +6,8 @@ import { View,
          TouchableOpacity, 
          ScrollView , 
          StyleSheet,
-         Image,
-         Dimensions
+         Image,         Dimensions,
+         TextInput
       } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -16,7 +16,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as webBrowser from 'expo-web-browser';
 import { StatusBar } from 'expo-status-bar';
-import { color } from 'react-native-reanimated';
+import Colors from './src/styles/Colors';
+import { Linking } from 'react-native';
+import qs from 'qs';
 
 
 function HomeScreen({navigation}) {
@@ -154,12 +156,168 @@ function SobreScreen({navigation}) {
 }
 
 function ContatoScreen({navigation}) {
+
+  const [showModal, setmodal]=useState(false);
+  const abrirModalContato = ()=>{
+    setmodal(!showModal);
+  }
+
+  const abrirRedeSocial = async (rede) =>{
+    let res = await webBrowser.openBrowserAsync(rede);
+  }
+
+  async function sendEmail(to, subject, body, options = {}) {
+    const { cc, bcc } = options;
+
+    let url = `mailto:${to}`;
+
+    // Create email link query
+    const query = qs.stringify({
+        subject: subject,
+        body: body,
+        cc: cc,
+        bcc: bcc
+    });
+
+    if (query.length) {
+        url += `?${query}`;
+    }
+
+    // check if we can use this link
+    const canOpen = await Linking.canOpenURL(url);
+
+    if (!canOpen) {
+        throw new Error('Provided URL can not be handled');
+    }
+
+    return Linking.openURL(url);
+}
+
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Contato Screen</Text>
-      <TouchableOpacity onPress={()=> navigation.goBack()}>
-        <Text>Voltar</Text>
-      </TouchableOpacity>
+    <View style={{flex:1}}>
+
+      {
+        (showModal)?
+        <View style={styles.modalParent}>
+          <View style={{position:'absolute', right:0, top:0, width:50, height:50, backgroundColor: '#333',zIndex:2, justifyContent: 'center'}}>
+          <TouchableOpacity style={{width:'100%', height: '100%', justifyContent:'center'}} onPress={()=>setmodal(!showModal)}>
+            <Text style={{color: '#fff', textAlign: 'center'}}>Fechar</Text>
+          </TouchableOpacity>
+          </View>
+          <View style={styles.boxModal}>
+            <View>
+              <Text style={{...styles.textHeader, fontSize:15, padding:8}}>Qual seu nome?</Text>
+              <TextInput 
+                style={{height:40, width: '100%', borderColor: '#ccc',borderWidth:1, marginBottom:20}} 
+                numberOfLines={4}
+              ></TextInput>
+            </View>
+
+            <View>
+              <Text style={{...styles.textHeader, fontSize:15, padding:8}}>Qual sua mensagem?</Text>
+              <TextInput 
+                style={{height:80, width: '100%', borderColor: '#ccc',borderWidth:1, marginBottom:20}} 
+                numberOfLines={4}
+              ></TextInput>
+            </View>
+            <TouchableOpacity onPress={()=> abrirModalContato()} style={{...styles.btnNavigation, justifyContent:'center', borderRadius:0}}>
+              <Text style={{color: '#fff', fontSize: 15, fontWeight: 'bold'}}>Enviar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>:
+        <View></View>
+      }
+
+      <View style={{ flex: 1, padding: 10}}>
+        <ScrollView contentContainerStyle={{padding:20}} style={styles.container}>
+          <Text style={styles.textHeader}>Contato</Text>
+
+          <TouchableOpacity 
+          style={styles.btnNavContato}
+          onPress={()=>abrirRedeSocial('https://web.facebook.com/diegosousa.dasilva.1/')}
+          >
+            <Ionicons name='logo-facebook' size={50} color='blue'/>
+            <View style={{alignItems:'center'}}>
+              <Text 
+                style={{color: Colors.text, fontSize: 16, fontWeight: 'bold'}}
+              >
+                Entrar no Facebook
+              </Text>
+              <Text style={{color: Colors.metalDark}}>facebook.com/diegosousa.dasilva.1/</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.btnNavContato}
+            onPress={()=>abrirRedeSocial('https://www.instagram.com/diego_d._sousa/')}  
+          >
+            <Ionicons name='logo-instagram' size={50} color={Colors.text}/>
+            <View style={{alignItems:'center'}}>
+              <Text 
+                style={{color: Colors.text, fontSize: 16, fontWeight: 'bold'}}
+              >
+                Entrar no Instagram
+              </Text>
+              <Text style={{color: Colors.metalDark}}>instagram.com/diego_d._sousa/</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.btnNavContato}
+            onPress={()=>abrirRedeSocial('http://www.linkedin.com/in/diego-sousa-dev')}  
+          >
+            <Ionicons name='logo-linkedin' size={50} color='blue'/>
+            <View style={{alignItems:'center'}}>
+              <Text 
+                style={{color: Colors.text, fontSize: 16, fontWeight: 'bold'}}
+              >
+                Entrar no Linkedin
+              </Text>
+              <Text style={{color: Colors.metalDark}}>linkedin.com/in/diego-sousa-dev</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.btnNavContato}
+            onPress={()=>abrirRedeSocial('https://github.com/diegosousasilva')}  
+          >
+            <Ionicons name='logo-github' size={50} color={Colors.black}/>
+            <View style={{alignItems:'center'}}>
+              <Text 
+                style={{color: Colors.text, fontSize: 16, fontWeight: 'bold'}}
+              >
+                Entrar no Github
+              </Text>
+              <Text style={{color: Colors.metalDark}}>facebook.com/diegosousa.dasilva.1/</Text>
+            </View>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            onPress={()=>sendEmail(
+              'derickbenji2@gmail.com',
+              'Oi, tudo bem',
+              'Parabéns, muito interessante este projeto.....'
+              ).then(() => {
+              console.log('Our email successful provided to device mail ');
+              })}
+            style={styles.btnNavContato}
+          >
+            <Ionicons name='ios-mail' size={50} color={Colors.red}/>
+            <View style={{alignItems:'center'}}>
+              <Text 
+                style={{color: Colors.text, fontSize: 16, fontWeight: 'bold'}}
+              >
+                Enviar um Email
+              </Text>
+              <Text style={{color: Colors.metalDark}}>facebook.com/diegosousa.dasilva.1/</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={()=> abrirModalContato()} style={{...styles.btnNavigation, justifyContent:'center'}}>
+            <Text style={{color: '#fff', fontSize: 15, fontWeight: 'bold'}}>Enviar Mensagem</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -230,17 +388,47 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   textHeader: {
-    color: "#e91e63",
+    color: Colors.text,
     fontSize: 24,
     fontWeight: 'bold'
   },
   btnNavigation:{
-    backgroundColor: "#e91e63",
+    backgroundColor: Colors.text,
     padding: 20,
     marginTop: 15,
     borderRadius: 8,
     flexDirection: 'row',
 
+  },
+  modalParent: {
+    position:"absolute",
+    left:0,
+    top:0,
+    width:'100%',
+    height:'100%',
+    backgroundColor: 'rgba(0,0,0,.6)',
+    zIndex:1
+  },
+  boxModal:{
+    backgroundColor: Colors.white,
+    height: 370,
+    width:'100%',
+    position: 'absolute',
+    left:0,
+    top: '50%',
+    marginTop: -185
+  },
+  btnNavContato:{
+    backgroundColor: Colors.champagne,
+    padding: 10,
+    marginTop: 10,
+    borderTopRightRadius: 16,
+    borderBottomLeftRadius:16,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    borderWidth:1,
+    borderColor: Colors.background
   },
 
 
