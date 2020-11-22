@@ -1,12 +1,20 @@
 // In App.js in a new project
 
-import * as React from 'react';
-import { View, Text, TouchableOpacity, ScrollView , StyleSheet} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import { View, 
+         Text, 
+         TouchableOpacity, 
+         ScrollView , 
+         StyleSheet,
+         Image,
+         Dimensions
+      } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import * as webBrowser from 'expo-web-browser';
 
 
 function HomeScreen({navigation}) {
@@ -44,9 +52,75 @@ function HomeScreen({navigation}) {
 }
 
 function PortifolioScreen({navigation}) {
+
+  const [images, setImages] = useState([
+    {
+      img: require('./src/assets/app_musica.jpg'),
+      width: 0,
+      height: 0,
+      ratio: 0,
+      git: 'https://github.com/DiegoSousaSilva/app-musica',
+    },
+    {
+      img: require('./src/assets/app_smart_money.jpg'),
+      width: 0,
+      height: 0,
+      ratio: 0,
+      git: 'https://github.com/DiegoSousaSilva/app-smart-money',
+    }
+  ])
+
+  const [windowWidth, setWindowWidth] = useState(0);
+
+  useEffect(() => {
+    let windowWidthL = Dimensions.get('window').width;
+    setWindowWidth(windowWidthL - 30 - 40);
+    let newImages = images.filter((val)=>{
+      let w = Image.resolveAssetSource(val.img).width;
+      let h = Image.resolveAssetSource(val.img).height;
+
+      val.width = w;
+      val.height = h;
+
+      val.ratio = h/w;
+      return val;
+    })
+
+    setImages(newImages);
+
+  }, [])
+
+  const abrirGithub = async (github) =>{
+    let res = await webBrowser.openBrowserAsync(github);
+  }
+
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Portifiolio Screen</Text>
+    <View style={{ flex: 1, padding: 15 }}>
+      <ScrollView contentContainerStyle={{padding:20}} style={styles.container}>
+        <Text style={styles.textHeader}>Últimos Projetos</Text>
+
+        {
+          images.map((val)=>{
+            return (
+              <View style={{paddingTop: 20}}>
+                <Image 
+                  style={{width:windowWidth, height: windowWidth*val.ratio, resizeMode: "stretch"}}
+                  source= {val.img}
+                />
+
+                <View style={[styles.btnNavigation, {marginTop:0, borderTopStartRadius:0, borderTopEndRadius:0, justifyContent: 'space-between'}]}>
+                  <TouchableOpacity onPress={abrirGithub(val.git)}><Text style={{color: "#fff"}}>Abrir Codigos no GitHub</Text></TouchableOpacity>
+                  <TouchableOpacity><Text style={{color: "#fff"}}>Baixar app</Text></TouchableOpacity>
+                </View>
+              </View>
+            )
+          })
+        }
+      </ScrollView>
+    
+
+
+
       <TouchableOpacity onPress={()=> navigation.goBack()}>
         <Text>Voltar</Text>
       </TouchableOpacity>
@@ -153,5 +227,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
 
   },
+
 
 })
