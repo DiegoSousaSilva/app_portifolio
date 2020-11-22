@@ -15,6 +15,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as webBrowser from 'expo-web-browser';
+import { StatusBar } from 'expo-status-bar';
+import { color } from 'react-native-reanimated';
 
 
 function HomeScreen({navigation}) {
@@ -88,7 +90,7 @@ function PortifolioScreen({navigation}) {
 
     setImages(newImages);
 
-  }, [])
+  }, []);
 
   const abrirGithub = async (github) =>{
     let res = await webBrowser.openBrowserAsync(github);
@@ -109,7 +111,7 @@ function PortifolioScreen({navigation}) {
                 />
 
                 <View style={[styles.btnNavigation, {marginTop:0, borderTopStartRadius:0, borderTopEndRadius:0, justifyContent: 'space-between'}]}>
-                  <TouchableOpacity onPress={abrirGithub(val.git)}><Text style={{color: "#fff"}}>Abrir Codigos no GitHub</Text></TouchableOpacity>
+                  <TouchableOpacity onPress={()=>abrirGithub(val.git)}><Text style={{color: "#fff"}}>Abrir Codigos no GitHub</Text></TouchableOpacity>
                   <TouchableOpacity><Text style={{color: "#fff"}}>Baixar app</Text></TouchableOpacity>
                 </View>
               </View>
@@ -129,12 +131,24 @@ function PortifolioScreen({navigation}) {
 }
 
 function SobreScreen({navigation}) {
+  let windowWidthSobre = Dimensions.get('window').width - 30 - 40;
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Sobre Screen</Text>
-      <TouchableOpacity onPress={()=> navigation.goBack()}>
-        <Text>Voltar</Text>
-      </TouchableOpacity>
+    <View style={{ flex: 1, padding: 15}}>
+      <ScrollView contentContainerStyle={{padding:20}} style={styles.container}> 
+        <Text style={styles.textHeader}>Sobre</Text>
+        <Image style={{width:windowWidthSobre, height:windowWidthSobre, marginTop:20}} source={{uri:'https://avatars0.githubusercontent.com/u/43018341?s=400&u=a433869c3183517148c93c1288c335019f63813e&v=4'}}/>
+        <View>
+          <Text style={{fontSize: 20, marginTop:10, marginLeft:10, color: 'gray'}}>Diego Sousa/Desenvolvedor </Text>
+          <Text style={{marginTop:10, textAlign:'justify', fontWeight:'400'}}>Meu nome é Diego Sousa, sou estudante de análise desenvolvimento de sistemas. Sempre fui apaixonado por TI, por ser uma área que esta sempre em evolução o que nos leva a estudar e se especializar constantemente.
+          {'\n'}Gosto de aprender coisas novas buscando sempre evoluir a cada dia, um passo por vez. No meu tempo livre gosto de assistir séries, filmes e animes,ler livros, ouvir música e sair com a família.</Text>
+
+          <TouchableOpacity onPress={()=>navigation.navigate('Contato')} style={{...styles.btnNavigation, justifyContent: 'center'}}>
+            <Text style={{color: '#fff', fontWeight: 'bold'}}>Entrar em contato</Text>
+          </TouchableOpacity>
+        </View>
+
+      </ScrollView>
+      
     </View>
   );
 }
@@ -156,7 +170,6 @@ const Stack = createStackNavigator();
 function App() {
   return (
     <NavigationContainer>
-  
       <Tab.Navigator
         initialRouteName="HomeScreen"
         tabBarOptions={{
@@ -205,6 +218,7 @@ function App() {
           }}
         />
       </Tab.Navigator>
+      <StatusBar hidden />
     </NavigationContainer>
   );
 }
@@ -218,6 +232,7 @@ const styles = StyleSheet.create({
   textHeader: {
     color: "#e91e63",
     fontSize: 24,
+    fontWeight: 'bold'
   },
   btnNavigation:{
     backgroundColor: "#e91e63",
