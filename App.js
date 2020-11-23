@@ -1,5 +1,3 @@
-// In App.js in a new project
-
 import React, {useState, useEffect} from 'react';
 import { View, 
          Text, 
@@ -8,9 +6,7 @@ import { View,
          StyleSheet,
          Image,         Dimensions,
          TextInput
-      } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+      } from 'react-native'import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -19,9 +15,10 @@ import { StatusBar } from 'expo-status-bar';
 import Colors from './src/styles/Colors';
 import { Linking } from 'react-native';
 import qs from 'qs';
+import {db} from './firebase';
 
 
-function HomeScreen({navigation}) {
+export function HomeScreen({navigation}) {
   return (
     <View style={{ padding:15}}>
      <ScrollView contentContainerStyle={{padding:20}} style={styles.container} > 
@@ -55,24 +52,24 @@ function HomeScreen({navigation}) {
   );
 }
 
-function PortifolioScreen({navigation}) {
+export function PortifolioScreen({navigation}) {
 
   const [images, setImages] = useState([
     {
-      img: require('./src/assets/app_musica.jpg'),
-      width: 0,
-      height: 0,
-      ratio: 0,
-      git: 'https://github.com/DiegoSousaSilva/app-musica',
-    },
-    {
-      img: require('./src/assets/app_smart_money.jpg'),
-      width: 0,
-      height: 0,
-      ratio: 0,
-      git: 'https://github.com/DiegoSousaSilva/app-smart-money',
-    }
-  ])
+    img: require('./src/assets/app_musica.jpg'),
+    width: 0,
+    height: 0,
+    ratio: 0,
+    git: 'https://github.com/DiegoSousaSilva/app-musica',
+  },
+  {
+    img: require('./src/assets/app_smart_money.jpg'),
+    width: 0,
+    height: 0,
+    ratio: 0,
+    git: 'https://github.com/DiegoSousaSilva/app-smart-money',
+  }
+  ]);
 
   const [windowWidth, setWindowWidth] = useState(0);
 
@@ -104,9 +101,9 @@ function PortifolioScreen({navigation}) {
         <Text style={styles.textHeader}>Últimos Projetos</Text>
 
         {
-          images.map((val)=>{
+          images.map((val, index)=>{
             return (
-              <View style={{paddingTop: 20}}>
+              <View key={index} style={{paddingTop: 20}}>
                 <Image 
                   style={{width:windowWidth, height: windowWidth*val.ratio, resizeMode: "stretch"}}
                   source= {val.img}
@@ -121,18 +118,11 @@ function PortifolioScreen({navigation}) {
           })
         }
       </ScrollView>
-    
-
-
-
-      <TouchableOpacity onPress={()=> navigation.goBack()}>
-        <Text>Voltar</Text>
-      </TouchableOpacity>
     </View>
   );
 }
 
-function SobreScreen({navigation}) {
+export function SobreScreen({navigation}) {
   let windowWidthSobre = Dimensions.get('window').width - 30 - 40;
   return (
     <View style={{ flex: 1, padding: 15}}>
@@ -155,15 +145,27 @@ function SobreScreen({navigation}) {
   );
 }
 
-function ContatoScreen({navigation}) {
+export function ContatoScreen({navigation}) {
 
   const [showModal, setmodal]=useState(false);
   const abrirModalContato = ()=>{
     setmodal(!showModal);
   }
+  const [nome, setnome] = useState('');
+  const [mensagem, setmensagem] = useState('');
 
   const abrirRedeSocial = async (rede) =>{
     let res = await webBrowser.openBrowserAsync(rede);
+  }
+
+  const enviarMensagem = ()=>{
+   db.collection('contato').add({
+     nome: nome,
+     mensagem: mensagem
+   })
+   alert('Sua mensagem foi enviada com sucesso'); 
+   setnome('');
+   setmensagem('');
   }
 
   async function sendEmail(to, subject, body, options = {}) {
@@ -201,13 +203,15 @@ function ContatoScreen({navigation}) {
         <View style={styles.modalParent}>
           <View style={{position:'absolute', right:0, top:0, width:50, height:50, backgroundColor: '#333',zIndex:2, justifyContent: 'center'}}>
           <TouchableOpacity style={{width:'100%', height: '100%', justifyContent:'center'}} onPress={()=>setmodal(!showModal)}>
-            <Text style={{color: '#fff', textAlign: 'center'}}>Fechar</Text>
+            <Text style={{color: '#fff', textAlign: 'center'}}>X</Text>
           </TouchableOpacity>
           </View>
           <View style={styles.boxModal}>
             <View>
               <Text style={{...styles.textHeader, fontSize:15, padding:8}}>Qual seu nome?</Text>
               <TextInput 
+                value={nome}
+                onChangeText={(text)=>setnome(text)}
                 style={{height:40, width: '100%', borderColor: '#ccc',borderWidth:1, marginBottom:20}} 
                 numberOfLines={4}
               ></TextInput>
@@ -216,11 +220,13 @@ function ContatoScreen({navigation}) {
             <View>
               <Text style={{...styles.textHeader, fontSize:15, padding:8}}>Qual sua mensagem?</Text>
               <TextInput 
+                value={mensagem}
+                onChangeText={(text)=>setmensagem(text)}
                 style={{height:80, width: '100%', borderColor: '#ccc',borderWidth:1, marginBottom:20}} 
                 numberOfLines={4}
               ></TextInput>
             </View>
-            <TouchableOpacity onPress={()=> abrirModalContato()} style={{...styles.btnNavigation, justifyContent:'center', borderRadius:0}}>
+            <TouchableOpacity onPress={()=> enviarMensagem()} style={{...styles.btnNavigation, justifyContent:'center', borderRadius:0}}>
               <Text style={{color: '#fff', fontSize: 15, fontWeight: 'bold'}}>Enviar</Text>
             </TouchableOpacity>
           </View>
@@ -241,7 +247,7 @@ function ContatoScreen({navigation}) {
               <Text 
                 style={{color: Colors.text, fontSize: 16, fontWeight: 'bold'}}
               >
-                Entrar no Facebook
+                Visitar Facebook
               </Text>
               <Text style={{color: Colors.metalDark}}>facebook.com/diegosousa.dasilva.1/</Text>
             </View>
@@ -256,7 +262,7 @@ function ContatoScreen({navigation}) {
               <Text 
                 style={{color: Colors.text, fontSize: 16, fontWeight: 'bold'}}
               >
-                Entrar no Instagram
+                Visitar Instagram
               </Text>
               <Text style={{color: Colors.metalDark}}>instagram.com/diego_d._sousa/</Text>
             </View>
@@ -271,7 +277,7 @@ function ContatoScreen({navigation}) {
               <Text 
                 style={{color: Colors.text, fontSize: 16, fontWeight: 'bold'}}
               >
-                Entrar no Linkedin
+                Visitar Linkedin
               </Text>
               <Text style={{color: Colors.metalDark}}>linkedin.com/in/diego-sousa-dev</Text>
             </View>
@@ -286,9 +292,9 @@ function ContatoScreen({navigation}) {
               <Text 
                 style={{color: Colors.text, fontSize: 16, fontWeight: 'bold'}}
               >
-                Entrar no Github
+                Visitar Github
               </Text>
-              <Text style={{color: Colors.metalDark}}>facebook.com/diegosousa.dasilva.1/</Text>
+              <Text style={{color: Colors.metalDark}}>github.com/diegosousasilva</Text>
             </View>
           </TouchableOpacity>
           
@@ -309,7 +315,7 @@ function ContatoScreen({navigation}) {
               >
                 Enviar um Email
               </Text>
-              <Text style={{color: Colors.metalDark}}>facebook.com/diegosousa.dasilva.1/</Text>
+              <Text style={{color: Colors.metalDark}}>derickbenji2@gmail.com</Text>
             </View>
           </TouchableOpacity>
 
@@ -323,9 +329,9 @@ function ContatoScreen({navigation}) {
 }
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
 
 function App() {
+  
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -351,8 +357,7 @@ function App() {
             tabBarLabel: 'Portifolio',
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="ios-list-box" color={color} size={size} />
-            ),
-            tabBarBadge: 3,
+            )
           }}
         />
         <Tab.Screen
@@ -377,8 +382,9 @@ function App() {
         />
       </Tab.Navigator>
       <StatusBar hidden />
-    </NavigationContainer>
-  );
+        </NavigationContainer>
+        
+  )
 }
 
 export default App;
@@ -425,11 +431,9 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     borderBottomLeftRadius:16,
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth:1,
     borderColor: Colors.background
   },
-
-
 })
